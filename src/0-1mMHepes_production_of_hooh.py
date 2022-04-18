@@ -31,7 +31,7 @@ Hepes_01_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx','0.
 Hepes_01_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']     #renaming columns of dataframe so they are labeled appropriately 
 
 
-'''
+
 #print(Hepes_.1_df)                             #printing df to make sure I have all the data and labels correct
 #print(Hepes_.1_df[['Time (days)']])                  #making sure I can call the columns by thier new names
 #print(Hepes_.1_df[['HOOH Concentration (\u03BCM)']])
@@ -73,4 +73,4 @@ plt.plot(times,Hs,c='g',marker='.',label='0.1\u03BCM Hepes Analytical Solution')
 
 plt.legend()
 plt.show()
-'''
+

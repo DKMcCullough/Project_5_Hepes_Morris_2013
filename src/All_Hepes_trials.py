@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 #  Importing the data as dfs for each trial
 
 ######################################################################
-
+'''
 #####   10 Hepes
 Hepes_10_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx', header = 2)   #importing data while ignoring 2 header rows...from first sheet of excel file
 Hepes_10_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']     #renaming columns of dataframe so they are labeled appropriately 
@@ -45,9 +45,28 @@ Hepes_01_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']
 #######   0 Hepes
 
 Hepes_0_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx','0mM Hepes', header = 2)   #importing data for 0 trial 
-Hepes_0_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']     
+Hepes_0_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']  
+
+'''
+#import csv
+df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
+df_all.rename(columns = {'treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
+#df_all[['rep1', 'rep2','rep3']] = df_all[['rep1', 'rep2','rep3']].fillna(value=0)
+#df_all = df_all.dropna(axis = 1)     #taking NaN columns off the end of df but had to fill rep 1 and 2 Nans first
+df_all = df_all.rename({'Time(days)':'times'}, axis=1)    #'renaming column to make it callable by 'times'
+#neeed to cut off extra NAN columns 
 
 
+ROSs = df_all['treatment'].unique()
+#ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
+
+
+f1,ax1 = plt.subplots()
+for r in ROSs:
+    if (df_all['treatment']==r):
+        ax1[].plot(df_all['times'],df_all['HOOH'],marker='o',label='Hepes [ ]'+ str(r))
+
+'''
 
 
 plt.scatter(Hepes_10_df[['Time (days)']],Hepes_10_df[['HOOH Concentration (\u03BCM)']], marker = 'x', s=50, c = 'r', label = 'HOOH from 10\u03BCM Hepes')
@@ -174,3 +193,4 @@ plt.plot(times,Hs,c='y',marker='.',label='0\u03BCM Hepes Analytical Solution')
 
 plt.legend()
 plt.show()
+'''
