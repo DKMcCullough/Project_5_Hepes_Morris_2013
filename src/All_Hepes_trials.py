@@ -14,7 +14,7 @@ location:/Users/dkm/Documents/Talmy_research/Zinser_and_Ben/Project_5_Hepes_Morr
 
 
 from scipy import *
-from scipy.integrate import *
+from scipy.integrate import odeint
 import pandas as pd
 import numpy as np      
 import matplotlib.pyplot as plt   
@@ -50,35 +50,35 @@ Hepes_0_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']
 '''
 #import csv
 df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
-df_all.rename(columns = {'treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
+df_all.rename(columns = {'Time (days)':'times','treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
 #df_all[['rep1', 'rep2','rep3']] = df_all[['rep1', 'rep2','rep3']].fillna(value=0)
 #df_all = df_all.dropna(axis = 1)     #taking NaN columns off the end of df but had to fill rep 1 and 2 Nans first
-df_all = df_all.rename({'Time(days)':'times'}, axis=1)    #'renaming column to make it callable by 'times'
+#df_all = df_all.rename({'Time(days)':'times'}, axis=1)    #'renaming column to make it callable by 'times'
 #neeed to cut off extra NAN columns 
 
 
 ROSs = df_all['treatment'].unique()
+nROSs = ROSs.shape[0]
 #ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
 
 
-f1,ax1 = plt.subplots()
-for r in ROSs:
-    if (df_all['treatment']==r):
-        ax1[].plot(df_all['times'],df_all['HOOH'],marker='o',label='Hepes [ ]'+ str(r))
-
-'''
+f1,ax1 = plt.subplots(figsize=[8,6])
 
 
-plt.scatter(Hepes_10_df[['Time (days)']],Hepes_10_df[['HOOH Concentration (\u03BCM)']], marker = 'x', s=50, c = 'r', label = 'HOOH from 10\u03BCM Hepes')
-plt.scatter(Hepes_1_df[['Time (days)']],Hepes_1_df[['HOOH Concentration (\u03BCM)']], marker = 'x', s=50, c = 'b', label = 'HOOH from 1.0\u03BCM Hepes')
-plt.scatter(Hepes_01_df[['Time (days)']],Hepes_01_df[['HOOH Concentration (\u03BCM)']], marker = 'x', s=50, c = 'g', label = 'HOOH from 0.1\u03BCM Hepes')
-plt.scatter(Hepes_0_df[['Time (days)']],Hepes_0_df[['HOOH Concentration (\u03BCM)']], marker = 'x', s=50, c = 'y', label = 'HOOH from 0\u03BCM Hepes')
+for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
+    tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
+    ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
 
 
-plt.xlabel('Time (day)', fontsize = 16)
-plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 16)
+
+
+
+plt.xlabel('Time (days)', fontsize = 20)
+plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 20)
 plt.yscale('log')
-plt.tick_params(labelsize = 12) 
+plt.tick_params(labelsize = 18) 
+plt.tick_params(size = 14)
+plt.legend(loc='upper left')
 #plt.show()
 
 
@@ -94,8 +94,59 @@ step = 0.05 #delta t
 ndays = 26
 times = np.linspace(0,ndays,int(ndays/step))
 
+h_convert = 0.65                      #term used to convert input Hepes concentration to HOOH felt by cells
+S_Hs = np.array([])
+
+#making HOOH [ ] fromo HEPES [ ] given 
+for r in ROSs: 
+    S_HOOH = r * h_convert      #TAKING HEPES AT EACH TREATMENT AND FINDING HOOH BASED ON COMMON CONVERSION FACTOR
+    S_Hs = np.append(S_Hs,S_HOOH)
+
+nS_Hs = S_Hs.shape[0]
 
 
+#model for use in ode int
+def HsODEint(H,t):
+    dHdt = S_HOOH-delta*H
+    #print(dHdt,t,H)
+    return dHdt 
+
+
+for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
+    tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
+    #ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+    for (he,ho) in zip(ROSs,S_Hs):   #want to iterate over S_Hs and print off resulting MODEL AND THE ANNOTATE WITH COREECT HEPES [ ] THAT ORIGINALLY MADE SAID S_HOOH
+        print('I am broken')
+        H0 = ho  #to have initital S_HOOH value for each model based on converison from HEPES 
+        delta = 0.47
+        H = np.array([])
+        solutions = odeint(HsODEint,H0,times)
+        print(solutions)
+    #ax1.plot(times,solutions, linewidth = 2, label = ('HEPES = '+str(he))
+
+#   tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
+#   ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+
+
+
+#ambient_solutions = odeint(HsODEint,0,times)
+
+
+
+
+
+#def f(t, S_HOOH, delta):
+#       H = (S_HOOH/delta)*(1-e**(-delta*t))
+#       return H
+
+#Hs = f(times,S_HOOH,delta)
+#print(times,Hs) 
+
+
+#plt.plot(times,Hs,c='r',marker='.',label='10\u03BCM Hepes Analytical Solution')
+
+
+'''
 
 ####################################
 
@@ -186,11 +237,10 @@ Hs = f(times,S_HOOH,delta)
 
 plt.plot(times,Hs,c='y',marker='.',label='0\u03BCM Hepes Analytical Solution')
 
-
-
-
-
-
+'''
 plt.legend()
 plt.show()
-'''
+
+
+
+print('Done')
