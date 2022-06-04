@@ -27,27 +27,7 @@ import matplotlib.pyplot as plt
 #  Importing the data as dfs for each trial
 
 ######################################################################
-'''
-#####   10 Hepes
-Hepes_10_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx', header = 2)   #importing data while ignoring 2 header rows...from first sheet of excel file
-Hepes_10_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']     #renaming columns of dataframe so they are labeled appropriately 
 
-######  1 Hepes
-Hepes_1_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx','1 mM Hepes', header = 2)   #importing data for 1.0 trial 
-Hepes_1_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']     
-
- 
-###### 0.1 Hepes
-
-Hepes_01_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx','0.1mM Hepes', header = 2)   #importing data for 0.1 trial
-Hepes_01_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']    
-
-#######   0 Hepes
-
-Hepes_0_df = pd.read_excel('../data/data_fig1a_Morris_and_Zinser_2013.xlsx','0mM Hepes', header = 2)   #importing data for 0 trial 
-Hepes_0_df.columns = ['Time (days)', 'HOOH Concentration (\u03BCM)']  
-
-'''
 #import csv
 df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
 df_all.rename(columns = {'Time (days)':'times','treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
@@ -63,13 +43,16 @@ nROSs = ROSs.shape[0]
 
 
 f1,ax1 = plt.subplots(figsize=[8,6])
+colors = ('green','b','orange','r')
 
+h0s = np.array([])
 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
-    ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
-
-
+    hoohs = tdf['HOOH']
+    h0 = hoohs.iloc[0]
+    h0s = np.append(h0,h0s) #fing start H for each trial for easier modeling later
+    ax1.plot(tdf['times'],tdf['HOOH'], marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
 
 
 
@@ -85,161 +68,109 @@ plt.legend(loc='upper left')
 
 ####################################
 
- # Units for all analytical solutions
+ # Set Up model parts 
 
 ####################################
-
-delta = 1.6    
+    
 step = 0.05 #delta t
 ndays = 26
 times = np.linspace(0,ndays,int(ndays/step))
 
-h_convert = 0.65                      #term used to convert input Hepes concentration to HOOH felt by cells
+h_cons = np.array([0.15,0.6,1.1,1.1])
+#h_convert = 0.6     #term used to convert input Hepes concentration to HOOH felt by cells
 S_Hs = np.array([])
-
+'''
 #making HOOH [ ] fromo HEPES [ ] given 
 for r in ROSs: 
     S_HOOH = r * h_convert      #TAKING HEPES AT EACH TREATMENT AND FINDING HOOH BASED ON COMMON CONVERSION FACTOR
+    S_Hs = np.append(S_Hs,S_HOOH)
+'''
+for (h_con,ros) in zip(h_cons,ROSs): # loop over ROS
+    S_HOOH = ros * h_con
+    print(ros,S_HOOH)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
     S_Hs = np.append(S_Hs,S_HOOH)
 
 nS_Hs = S_Hs.shape[0]
 
 
 #model for use in ode int
-def HsODEint(H,t):
+def HsODEint(y,t,S_HOOH,delta):
+    H = y[0]
     dHdt = S_HOOH-delta*H
     #print(dHdt,t,H)
     return dHdt 
 
+liROS = ROSs.tolist()
 
-for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
-    tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
-    #ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
-    for (he,ho) in zip(ROSs,S_Hs):   #want to iterate over S_Hs and print off resulting MODEL AND THE ANNOTATE WITH COREECT HEPES [ ] THAT ORIGINALLY MADE SAID S_HOOH
-        print('I am broken')
-        H0 = ho  #to have initital S_HOOH value for each model based on converison from HEPES 
-        delta = 0.47
-        H = np.array([])
-        solutions = odeint(HsODEint,H0,times)
-        print(solutions)
-    #ax1.plot(times,solutions, linewidth = 2, label = ('HEPES = '+str(he))
+delta = 0.02
+'''
+for (ros,S_HOOH,h0) in zip(ROSs,S_Hs,h0s): # loop over ROS
+    count = (liROS.index(ros))
+    print(ros,h0)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
+    solutions = odeint(HsODEint,h0,times,args=(S_HOOH,delta))  
+    plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
+'''
+for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
+    count = (liROS.index(ros))
+    #print(ros,h0)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
+    solutions = odeint(HsODEint,r_[[0.7]],times,args=(S_HOOH,delta))  
+    plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
+    
+plt.xlim([0, 26])
+plt.ylim([0.15, 50])
 
-#   tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
-#   ax1.plot(tdf['times'],tdf['HOOH'], marker='s', markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+'''
+####################################
+
+#analytical solutions 
+
+####################################
 
 
+S_HOOH = S_Hs
 
-#ambient_solutions = odeint(HsODEint,0,times)
+def f(t, S_HOOH, delta):
+        H = (S_HOOH/delta)*(1-e**(-delta*t))
+        return H
 
-
-
-
-
-#def f(t, S_HOOH, delta):
-#       H = (S_HOOH/delta)*(1-e**(-delta*t))
-#       return H
-
-#Hs = f(times,S_HOOH,delta)
+Hs = f(times,S_HOOH,delta)
 #print(times,Hs) 
 
+plt.plot(times,Hs,c='y',marker='.',label='Analytical Solution')
 
-#plt.plot(times,Hs,c='r',marker='.',label='10\u03BCM Hepes Analytical Solution')
 
+
+delta = 0.17
+for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
+    count = (liROS.index(ros))
+    #print(count)
+    solutions = Hs = f(times,S_HOOH,delta)
+    plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
 
 '''
 
-####################################
-
-#analytical solution for 10
-
-####################################
-
-#initial values and creating time array
-
-S_HOOH = 15
-
-def f(t, S_HOOH, delta):
-        H = (S_HOOH/delta)*(1-e**(-delta*t))
-        return H
-
-Hs = f(times,S_HOOH,delta)
-#print(times,Hs) 
-
-
-plt.plot(times,Hs,c='r',marker='.',label='10\u03BCM Hepes Analytical Solution')
-
-
-
-
-####################################
-
-#analytical solution for 1
-
-####################################
-
-#initial values and creating time array
-
-S_HOOH = 7.8
-
-def f(t, S_HOOH, delta):
-        H = (S_HOOH/delta)*(1-e**(-delta*t))
-        return H
-
-Hs = f(times,S_HOOH,delta)
-#print(times,Hs) 
-
-
-plt.plot(times,Hs,c='b',marker='.',label='1\u03BCM Hepes Analytical Solution')
-
-
-
-
-####################################
-
-#analytical solution for 0.1
-
-####################################
-
-#initial values and creating time array
-
-S_HOOH = 3.4
-
-def f(t, S_HOOH, delta):
-        H = (S_HOOH/delta)*(1-e**(-delta*t))
-        return H
-
-Hs = f(times,S_HOOH,delta)
-#print(times,Hs) 
-
-
-plt.plot(times,Hs,c='g',marker='.',label='0.1\u03BCM Hepes Analytical Solution')
-
-
-
-
-####################################
-
-#analytical solution for 00
-
-####################################
-
-#initial values and creating time array
-
-S_HOOH = 1.0
-
-def f(t, S_HOOH, delta):
-        H = (S_HOOH/delta)*(1-e**(-delta*t))
-        return H
-
-Hs = f(times,S_HOOH,delta)
-#print(times,Hs) 
-
-
-plt.plot(times,Hs,c='y',marker='.',label='0\u03BCM Hepes Analytical Solution')
-
-'''
 plt.legend()
 plt.show()
+
+fig, (ax2,ax3) = plt.subplots(1,2)
+fig.suptitle('HEPES conversions',fontsize = 20)
+plt.subplots_adjust(wspace = 0.3, top = 0.85)
+
+#f2, (ax2, ax3) = plt.subplots(1,2, figsize=[8,6])
+ax2.plot(ROSs,S_Hs, marker = 's', markersize = 8, color = 'brown')
+ax2.set_title('HEPES vs modeled S_HOOH',fontsize = 10)
+ax2.set_xlabel('HEPES added', fontsize = 10)
+ax2.set_ylabel('Modeled HOOH Supply', fontsize = 10)
+
+ax3.plot(ROSs,h_cons, marker = 'd', markersize = 8, color = 'k')
+ax3.set_title('h_convert',fontsize = 10)
+ax3.set_xlabel('HEPES added', fontsize = 10)
+ax3.set_ylabel('h_convert needed for model', fontsize = 10)
+#plt.tick_params(labelsize = 18) 
+#plt.tick_params(size = 14)
+#plt.legend(loc='lower right')
+
+
 
 
 
