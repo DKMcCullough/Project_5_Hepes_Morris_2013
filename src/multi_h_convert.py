@@ -62,7 +62,7 @@ plt.yscale('log')
 plt.tick_params(labelsize = 18) 
 plt.tick_params(size = 14)
 plt.legend(loc='upper left')
-plt.show()
+#plt.show()
 
 
 
@@ -76,7 +76,7 @@ step = 0.05 #delta t
 ndays = 26
 times = np.linspace(0,ndays,int(ndays/step))
 
-h_cons = np.array([0.15,0.6,1.5,1.5])
+h_cons = np.array([0.15,0.6,1.1,1.1])
 #h_convert = 0.6     #term used to convert input Hepes concentration to HOOH felt by cells
 S_Hs = np.array([])
 '''
@@ -91,7 +91,7 @@ for (h_con,ros) in zip(h_cons,ROSs): # loop over ROS
     S_Hs = np.append(S_Hs,S_HOOH)
 
 nS_Hs = S_Hs.shape[0]
-deltas = np.array([0.06,0.04,0.03,0.01])
+
 
 #model for use in ode int
 def HsODEint(y,t,S_HOOH,delta):
@@ -102,7 +102,7 @@ def HsODEint(y,t,S_HOOH,delta):
 
 liROS = ROSs.tolist()
 
-#delta = 0.02
+delta = 0.02
 '''
 for (ros,S_HOOH,h0) in zip(ROSs,S_Hs,h0s): # loop over ROS
     count = (liROS.index(ros))
@@ -110,7 +110,7 @@ for (ros,S_HOOH,h0) in zip(ROSs,S_Hs,h0s): # loop over ROS
     solutions = odeint(HsODEint,h0,times,args=(S_HOOH,delta))  
     plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
 '''
-for (ros,S_HOOH,delta) in zip(ROSs,S_Hs,deltas): # loop over ROS
+for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
     count = (liROS.index(ros))
     #print(ros,h0)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
     solutions = odeint(HsODEint,r_[[0.7]],times,args=(S_HOOH,delta))  
@@ -170,15 +170,7 @@ ax3.set_ylabel('h_convert needed for model', fontsize = 10)
 #plt.tick_params(size = 14)
 #plt.legend(loc='lower right')
 
-fig, (ax4) = plt.subplots()
-fig.suptitle('Delta dynamics',fontsize = 20)
-plt.subplots_adjust(wspace = 0.3, top = 0.85)
 
-
-ax4.plot(ROSs,deltas, marker = 'd', markersize = 8, color = 'k')
-#ax3.set_title('delta',fontsize = 10)
-ax4.set_xlabel('HEPES added', fontsize = 10)
-ax4.set_ylabel('delta needed for model', fontsize = 10)
 
 
 

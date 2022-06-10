@@ -62,7 +62,7 @@ plt.yscale('log')
 plt.tick_params(labelsize = 18) 
 plt.tick_params(size = 14)
 plt.legend(loc='upper left')
-plt.show()
+#plt.show()
 
 
 
@@ -76,10 +76,10 @@ step = 0.05 #delta t
 ndays = 26
 times = np.linspace(0,ndays,int(ndays/step))
 
-h_cons = np.array([0.15,0.6,1.5,1.5])
-#h_convert = 0.6     #term used to convert input Hepes concentration to HOOH felt by cells
+#h_cons = np.array([0.15,0.6,1.1,1.1])
+h_convert = 0.6     #term used to convert input Hepes concentration to HOOH felt by cells
 S_Hs = np.array([])
-'''
+
 #making HOOH [ ] fromo HEPES [ ] given 
 for r in ROSs: 
     S_HOOH = r * h_convert      #TAKING HEPES AT EACH TREATMENT AND FINDING HOOH BASED ON COMMON CONVERSION FACTOR
@@ -89,9 +89,9 @@ for (h_con,ros) in zip(h_cons,ROSs): # loop over ROS
     S_HOOH = ros * h_con
     print(ros,S_HOOH)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
     S_Hs = np.append(S_Hs,S_HOOH)
-
+'''
 nS_Hs = S_Hs.shape[0]
-deltas = np.array([0.06,0.04,0.03,0.01])
+deltas = np.array([0.4,0.04,0.0,0.0])
 
 #model for use in ode int
 def HsODEint(y,t,S_HOOH,delta):
@@ -152,33 +152,20 @@ for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
 plt.legend()
 plt.show()
 
-fig, (ax2,ax3) = plt.subplots(1,2)
-fig.suptitle('HEPES conversions',fontsize = 20)
-plt.subplots_adjust(wspace = 0.3, top = 0.85)
-
-#f2, (ax2, ax3) = plt.subplots(1,2, figsize=[8,6])
-ax2.plot(ROSs,S_Hs, marker = 's', markersize = 8, color = 'brown')
-ax2.set_title('HEPES vs modeled S_HOOH',fontsize = 10)
-ax2.set_xlabel('HEPES added', fontsize = 10)
-ax2.set_ylabel('Modeled HOOH Supply', fontsize = 10)
-
-ax3.plot(ROSs,h_cons, marker = 'd', markersize = 8, color = 'k')
-ax3.set_title('h_convert',fontsize = 10)
-ax3.set_xlabel('HEPES added', fontsize = 10)
-ax3.set_ylabel('h_convert needed for model', fontsize = 10)
-#plt.tick_params(labelsize = 18) 
-#plt.tick_params(size = 14)
-#plt.legend(loc='lower right')
-
-fig, (ax4) = plt.subplots()
+fig, (ax3) = plt.subplots()
 fig.suptitle('Delta dynamics',fontsize = 20)
 plt.subplots_adjust(wspace = 0.3, top = 0.85)
 
 
-ax4.plot(ROSs,deltas, marker = 'd', markersize = 8, color = 'k')
-#ax3.set_title('delta',fontsize = 10)
-ax4.set_xlabel('HEPES added', fontsize = 10)
-ax4.set_ylabel('delta needed for model', fontsize = 10)
+ax3.plot(ROSs,deltas, marker = 'd', markersize = 8, color = 'k')
+ax3.set_title('delta',fontsize = 10)
+ax3.set_xlabel('HEPES added', fontsize = 10)
+ax3.set_ylabel('delta needed for model', fontsize = 10)
+#plt.tick_params(labelsize = 18) 
+#plt.tick_params(size = 14)
+#plt.legend(loc='lower right')
+
+
 
 
 
