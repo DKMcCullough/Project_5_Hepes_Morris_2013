@@ -86,7 +86,7 @@ for r in ROSs:
     S_Hs = np.append(S_Hs,S_HOOH)
 '''
 for (h_con,ros) in zip(h_cons,ROSs): # loop over ROS
-    S_HOOH = ros * h_con
+    S_HOOH = (ros * h_con)
     print(ros,S_HOOH)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
     S_Hs = np.append(S_Hs,S_HOOH)
 
