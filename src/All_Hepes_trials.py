@@ -150,7 +150,7 @@ for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
 '''
 
 plt.legend()
-plt.show()
+#plt.show()
 
 fig, (ax2,ax3) = plt.subplots(1,2)
 fig.suptitle('HEPES conversions',fontsize = 20)
