@@ -31,12 +31,14 @@ import matplotlib.pyplot as plt
 #import csv
 df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
 df_all.rename(columns = {'Time (days)':'times','treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
-#df_all[['rep1', 'rep2','rep3']] = df_all[['rep1', 'rep2','rep3']].fillna(value=0)
-#df_all = df_all.dropna(axis = 1)     #taking NaN columns off the end of df but had to fill rep 1 and 2 Nans first
-#df_all = df_all.rename({'Time(days)':'times'}, axis=1)    #'renaming column to make it callable by 'times'
-#neeed to cut off extra NAN columns 
 
 
+
+
+
+
+
+#split ROS treatments by number 
 ROSs = df_all['treatment'].unique()
 nROSs = ROSs.shape[0]
 #ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
@@ -47,6 +49,7 @@ colors = ('green','b','orange','r')
 
 h0s = np.array([])
 
+#graphing ROS dfs each 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
     hoohs = tdf['HOOH']
