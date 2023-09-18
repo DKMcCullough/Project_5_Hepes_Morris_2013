@@ -10,6 +10,8 @@ Using Morrisand Zinser 2013 Fig 1_a  data about HOOH production from Hepes buffe
 created by DKM
 
 location:/Users/dkm/Documents/Talmy_research/Zinser_and_Ben/Project_5_Hepes_Morris_2013/scripts/
+
+to do: Get model working for Hepes treatments in data 
 '''
 
 
@@ -29,33 +31,52 @@ import matplotlib.pyplot as plt
 ######################################################################
 
 #import csv
-df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
-df_all.rename(columns = {'Time (days)':'times','treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
+df_all = pd.read_csv("../data/Hepes_assay_2013.csv") #use relative paths 
+df_all.rename(columns = {'time(days)':'times'},inplace = True) 
 
 
+#making log of data to look at error (how to do in loop? all combined whe I tried)
+df_all['log1'] = np.log(df_all['rep1'])
+df_all['log2'] = np.log(df_all['rep2'])
+df_all['log3'] = np.log(df_all['rep3'])
+df_all['log4'] = np.log(df_all['rep4'])
+df_all['log5'] = np.log(df_all['rep5'])
+df_all['log6'] = np.log(df_all['rep6'])
+
+
+df_all['abundance'] =  np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5','rep6']]],axis=0)
+df_all['log_abundance'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3', 'log4','log5','log6']]],axis=0)
+df_all['log_sigma'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3','log4','log5','log6']]],axis=0)
 
 
 
 
 
 #split ROS treatments by number 
-ROSs = df_all['treatment'].unique()
+ROSs = df_all['Hepes_treatment'].unique()
+#ROSs = ROSs.astype(float)
 nROSs = ROSs.shape[0]
 #ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
+
+
+
+
+
 
 
 f1,ax1 = plt.subplots(figsize=[8,6])
 colors = ('green','b','orange','r')
 
-h0s = np.array([])
+#h0s = np.array([])
 
 #graphing ROS dfs each 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
-    tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
-    hoohs = tdf['HOOH']
-    h0 = hoohs.iloc[0]
-    h0s = np.append(h0,h0s) #fing start H for each trial for easier modeling later
-    ax1.plot(tdf['times'],tdf['HOOH'], marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+    tdf = (df_all[df_all['Hepes_treatment']==ros]) # select one ROS treatment at a time 
+    hoohs = tdf['abundance']
+    times = tdf['time']
+    #h0 = hoohs.iloc[0]
+    #h0s = np.append(h0,h0s) #fing start H for each trial for easier modeling later
+    ax1.plot(times,hoohs, marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
 
 
 
