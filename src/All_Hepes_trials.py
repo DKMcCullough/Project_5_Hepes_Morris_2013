@@ -9,7 +9,7 @@ Using Morrisand Zinser 2013 Fig 1_a  data about HOOH production from Hepes buffe
 
 created by DKM
 
-location:/Users/dkm/Documents/Talmy_research/Zinser_and_Ben/Project_5_Hepes_Morris_2013/scripts/
+location:/Users/dkm/Documents/Talmy_research/Zinser_and_Ben/Project_5_Hepes_Morris_2013/src/
 
 to do: Get model working for Hepes treatments in data 
 '''
@@ -23,6 +23,14 @@ import matplotlib.pyplot as plt
 
 
 
+#####################################################
+#set figure RC params 
+#####################################################
+plt.rcParams["figure.dpi"] = 300
+plt.rcParams.update({'font.size': 16})
+plt.rcParams['legend.fontsize'] = 'small'
+ 
+
 
 ######################################################################
 
@@ -30,10 +38,13 @@ import matplotlib.pyplot as plt
 
 ######################################################################
 
+#/Users/dkm/Documents/Talmy_research/Zinser_lab/Projects/ROS_focused/Project_5_Hepes_Morris_2013/data/inits
+
 #import csv
 df_all = pd.read_csv("../data/Hepes_assay_2013.csv") #use relative paths 
-df_all.rename(columns = {'time(days)':'times'},inplace = True) 
-
+df_all.rename(columns = {'time(days)':'time'},inplace = True) 
+df_all.dropna()
+#use df clip? or just use 0H as control for base level of media 
 
 #making log of data to look at error (how to do in loop? all combined whe I tried)
 df_all['log1'] = np.log(df_all['rep1'])
@@ -43,31 +54,33 @@ df_all['log4'] = np.log(df_all['rep4'])
 df_all['log5'] = np.log(df_all['rep5'])
 df_all['log6'] = np.log(df_all['rep6'])
 
-
+#calculating stats for trial compilation
 df_all['abundance'] =  np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5','rep6']]],axis=0)
 df_all['log_abundance'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3', 'log4','log5','log6']]],axis=0)
 df_all['log_sigma'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3','log4','log5','log6']]],axis=0)
 
 
-
-
-
 #split ROS treatments by number 
 ROSs = df_all['Hepes_treatment'].unique()
-#ROSs = ROSs.astype(float)
+ROSs = ROSs[~np.isnan(ROSs)] #clipping off nans 
+
 nROSs = ROSs.shape[0]
-#ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
 
 
 
+################
+#graph for data viz 
+#################
 
+#fig creation and config 
+f1,ax1 = plt.subplots(figsize=[9,6])
+colors = ('yellowgreen','green','c','b','purple','orange','r','k')
+plt.xlabel('Time (days)', fontsize = 20)
+plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 20)
+plt.suptitle('HEPES Buffer HOOH Dynamics')
+ax1.semilogy()
+plt.tick_params(size = 14)
 
-
-
-f1,ax1 = plt.subplots(figsize=[8,6])
-colors = ('green','b','orange','r')
-
-#h0s = np.array([])
 
 #graphing ROS dfs each 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
@@ -79,20 +92,47 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     ax1.plot(times,hoohs, marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
 
 
+#makinng legend (must be after graphing to have label handles)
+l1 = ax1.legend(loc = 'lower right', prop={"size":13}) 
+l1.draw_frame(False)#print(df)
 
-plt.xlabel('Time (days)', fontsize = 20)
-plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 20)
-plt.yscale('log')
-plt.tick_params(labelsize = 18) 
-plt.tick_params(size = 14)
-plt.legend(loc='upper left')
+
 plt.show()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 ####################################
 
- # Set Up model parts 
+ # Set Up ---OLD _______ model parts 
 
 ####################################
     
@@ -103,12 +143,12 @@ times = np.linspace(0,ndays,int(ndays/step))
 h_cons = np.array([0.15,0.6,1.5,1.5])
 #h_convert = 0.6     #term used to convert input Hepes concentration to HOOH felt by cells
 S_Hs = np.array([])
-'''
+
 #making HOOH [ ] fromo HEPES [ ] given 
 for r in ROSs: 
     S_HOOH = r * h_convert      #TAKING HEPES AT EACH TREATMENT AND FINDING HOOH BASED ON COMMON CONVERSION FACTOR
     S_Hs = np.append(S_Hs,S_HOOH)
-'''
+
 for (h_con,ros) in zip(h_cons,ROSs): # loop over ROS
     S_HOOH = (ros * h_con)
     print(ros,S_HOOH)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
@@ -127,13 +167,13 @@ def HsODEint(y,t,S_HOOH,delta):
 liROS = ROSs.tolist()
 
 #delta = 0.02
-'''
+
 for (ros,S_HOOH,h0) in zip(ROSs,S_Hs,h0s): # loop over ROS
     count = (liROS.index(ros))
     print(ros,h0)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
     solutions = odeint(HsODEint,h0,times,args=(S_HOOH,delta))  
     plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
-'''
+
 for (ros,S_HOOH,delta) in zip(ROSs,S_Hs,deltas): # loop over ROS
     count = (liROS.index(ros))
     #print(ros,h0)   #the 1.0 and 0.1 start Hs are switched. Not sure where this occcurs. 
@@ -143,7 +183,7 @@ for (ros,S_HOOH,delta) in zip(ROSs,S_Hs,deltas): # loop over ROS
 plt.xlim([0, 26])
 plt.ylim([0.15, 50])
 
-'''
+
 ####################################
 
 #analytical solutions 
@@ -171,7 +211,7 @@ for (ros,S_HOOH) in zip(ROSs,S_Hs): # loop over ROS
     solutions = Hs = f(times,S_HOOH,delta)
     plt.plot(times,solutions[:,0],color = colors[count], marker = 'None')
 
-'''
+
 
 plt.legend()
 #plt.show()
@@ -204,6 +244,6 @@ ax4.plot(ROSs,deltas, marker = 'd', markersize = 8, color = 'k')
 ax4.set_xlabel('HEPES added', fontsize = 10)
 ax4.set_ylabel('delta needed for model', fontsize = 10)
 
+'''
 
-
-print('Done')
+print('Done with this H E P E S')
