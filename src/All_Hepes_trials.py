@@ -73,7 +73,7 @@ nROSs = ROSs.shape[0]
 #################
 
 #fig creation and config 
-f1,ax1 = plt.subplots(figsize=[9,6])
+fig1,ax1 = plt.subplots(figsize=[9,6])
 colors = ('yellowgreen','green','c','b','purple','orange','r','k')
 plt.xlabel('Time (days)', fontsize = 20)
 plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 20)
@@ -95,27 +95,14 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
 #makinng legend (must be after graphing to have label handles)
 l1 = ax1.legend(loc = 'lower right', prop={"size":13}) 
 l1.draw_frame(False)#print(df)
+fig1.subplots_adjust(right=0.90, wspace = 0.25, hspace = 0.30) #shift white space for better fig view
 
 
 plt.show()
+fig1.savefig('../figures/Hepes_all_data')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    #inits = pd.read_csv(("../data/inits/hepes"+str(ros)+".csv"))  
 
 
 
