@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 #set figure RC params 
 #####################################################
 plt.rcParams["figure.dpi"] = 300
-plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'font.size': 14})
 plt.rcParams['legend.fontsize'] = 'small'
  
 
@@ -62,7 +62,7 @@ df_all['log_sigma'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3','lo
 
 #split ROS treatments by number 
 ROSs = df_all['Hepes_treatment'].unique()
-ROSs = ROSs[~np.isnan(ROSs)] #clipping off nans 
+ROSs = ROSs[~pd.isna(ROSs)] #clipping off nans 
 
 nROSs = ROSs.shape[0]
 
@@ -232,5 +232,6 @@ ax4.set_xlabel('HEPES added', fontsize = 10)
 ax4.set_ylabel('delta needed for model', fontsize = 10)
 
 '''
-
+print('\n ~~~****~~~****~~~ \n')
 print('Done with this H E P E S')
+print('\n ~~~****~~~****~~~ \n')
