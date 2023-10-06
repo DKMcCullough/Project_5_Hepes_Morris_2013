@@ -54,10 +54,26 @@ df_all['log4'] = np.log(df_all['rep4'])
 df_all['log5'] = np.log(df_all['rep5'])
 df_all['log6'] = np.log(df_all['rep6'])
 
+df_all['avg1'] = np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3']]],axis=0)
+df_all['avg2'] = np.nanmean(np.r_[[df_all[i] for i in ['rep4', 'rep5', 'rep6']]],axis=0)
+df_all['stdv1'] = np.std(np.r_[[df_all[i] for i in ['rep1','rep2','rep3']]],axis=0)
+df_all['stdv2'] = np.std(np.r_[[df_all[i] for i in ['rep4', 'rep5', 'rep6']]],axis=0)
+
+#bio rep logged avgs and stdvs 
+df_all['lavg1'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3']]],axis=0)
+df_all['lavg2'] = np.nanmean(np.r_[[df_all[i] for i in ['log4','log5','log6']]],axis=0)
+df_all['stdlog1'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3']]],axis=0)
+df_all['stdlog2'] = np.std(np.r_[[df_all[i] for i in ['log4','log5','log6']]],axis=0)
+
+
+
+
 #calculating stats for trial compilation
 df_all['abundance'] =  np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5','rep6']]],axis=0)
+df_all['sigma'] = np.nanstd(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5', 'rep6']]],axis=0)
+
 df_all['log_abundance'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3', 'log4','log5','log6']]],axis=0)
-df_all['log_sigma'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3','log4','log5','log6']]],axis=0)
+df_all['log_sigma'] = np.nanstd(np.r_[[df_all[i] for i in ['log1','log2','log3','log4','log5','log6']]],axis=0)
 
 
 #split ROS treatments by number 
@@ -66,6 +82,8 @@ ROSs = ROSs[~pd.isna(ROSs)] #clipping off nans
 
 nROSs = ROSs.shape[0]
 
+colors = ('yellowgreen','green','c','b','purple','orange','r','k')
+markers = ('.','P','s','1','^','*','p','+')
 
 
 ################
@@ -74,7 +92,8 @@ nROSs = ROSs.shape[0]
 
 #fig creation and config 
 fig1,ax1 = plt.subplots(figsize=[9,6])
-colors = ('yellowgreen','green','c','b','purple','orange','r','k')
+
+
 plt.xlabel('Time (days)', fontsize = 20)
 plt.ylabel('HOOH concentration (\u03BCM)', fontsize = 20)
 plt.suptitle('HEPES Buffer HOOH Dynamics')
@@ -82,14 +101,69 @@ ax1.semilogy()
 plt.tick_params(size = 14)
 
 
+fig2,(ax2)= plt.subplots(nROSs,2, figsize = (14,11))
+fig2.suptitle('Raw H dynamics of Hepes Buffer ')
+fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
+ax2[0,0].set_title('Production Curve')
+ax2[3,0].set_ylabel('HOOH concentration (\u03BCM)')
+ax2[-1,0].set_xlabel('Time' )
+ax2[0,0].semilogy()
+ax2[0,1].set_title('STATS')
+ax2[3,1].set_ylabel('STDV')
+ax2[-1,1].set_xlabel('Mean' )
+
+fig3,(ax3) = plt.subplots(nROSs,2,figsize = (14,11))
+fig3.suptitle(' Log H dynamics of Hepes Buffer ')
+fig3.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
+ax3[0,0].set_title('Production Curve')
+ax3[3,0].set_ylabel('HOOH concentration (\u03BCM)')
+ax3[-1,0].set_xlabel('Time' )
+ax3[0,0].semilogy()
+ax3[0,1].set_title('STATS')
+ax3[3,1].set_ylabel('Log STDV')
+ax3[-1,1].set_xlabel('Log Mean' )
+
+
 #graphing ROS dfs each 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
-    tdf = (df_all[df_all['Hepes_treatment']==ros]) # select one ROS treatment at a time 
-    hoohs = tdf['abundance']
-    times = tdf['time']
-    #h0 = hoohs.iloc[0]
-    #h0s = np.append(h0,h0s) #fing start H for each trial for easier modeling later
-    ax1.plot(times,hoohs, marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+    df = (df_all[df_all['Hepes_treatment']==ros]) # select one ROS treatment at a time 
+    ax1.plot(df.time,df.abundance,color = colors[ri], marker = markers[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+    #raw data and stats for multi graph
+    ax2[ri,0].errorbar(df.time,df.abundance, yerr=df.sigma, marker = markers[ri],markersize= 10, label =('Mean'), c=colors[ri])
+    ax2[ri,0].errorbar(df.time,df.avg1, yerr=df.stdv1,marker = markers[ri],markersize= 10, label =('avg1'), color = 'k' )
+    ax2[ri,0].errorbar(df.time,df.avg2, yerr=df.stdv2,marker = markers[ri],markersize= 10, label =('avg2'), color = 'brown' )
+    #log y axis and add legend to dynamics graph 
+    ax2[ri,0].semilogy()
+    l2 = ax2[ri,0].legend(loc = 'upper left')
+    l2.draw_frame(False)
+    #graph loggedstats
+    ax2[ri,1].scatter(df.log_abundance,df.log_sigma, c=colors[ri])
+    ax2[ri,1].scatter(df.lavg1,df.stdlog1, c='k')
+    ax2[ri,1].scatter(df.lavg2,df.stdlog2, c='brown')
+    #annotate side of large fig
+    ax2[ri,0].text(1.2,0.5,('Hepes [] : '+ str(ros)),horizontalalignment='center', verticalalignment='center', transform=ax2[ri,1].transAxes)
+
+###########
+        #graph logged dynamics 
+     
+    ax3[ri,0].errorbar(df.time,df.log_abundance, yerr=df.sigma, marker = markers[ri],markersize= 10, label =('Log Mean'), c=colors[ri] )
+    ax3[ri,0].errorbar(df.time,df.lavg1, yerr=df.stdlog1, marker = markers[ri],markersize= 10, label =('Log avg1'), color = 'k' )
+    ax3[ri,0].errorbar(df.time,df.lavg2, yerr=df.stdlog2,marker = markers[ri],markersize= 10, label =('Log avg2'), color = 'brown' )
+    #log y axis and add legend to dynamics graph 
+    ax3[ri,0].semilogy()
+    l3 = ax3[ri,0].legend(loc = 'upper left')
+    l3.draw_frame(False)
+#annotate
+    ax3[ri,0].text(1.2,0.5,'Hepes [] : '+ str(ros),horizontalalignment='center', verticalalignment='center', transform=ax3[ri,1].transAxes)
+
+    #logged stats
+
+    ax3[ri,1].scatter(df.abundance,df.sigma, c=colors[ri])
+    ax3[ri,1].scatter(df.avg1,df.stdv1, c='k')
+    ax3[ri,1].scatter(df.avg2,df.stdv2, c='brown')
+
+
+    
 
 
 #makinng legend (must be after graphing to have label handles)
@@ -97,10 +171,16 @@ l1 = ax1.legend(loc = 'lower right', prop={"size":13})
 l1.draw_frame(False)#print(df)
 fig1.subplots_adjust(right=0.90, wspace = 0.25, hspace = 0.30) #shift white space for better fig view
 
+plt.xticks(fontsize = 14)
+plt.yticks(fontsize = 14)
+
 
 plt.show()
 fig1.savefig('../figures/Hepes_all_data')
-
+fig2.savefig('../figures/logDynamics_hepes.png')
+fig3.savefig('../figures/rawdynamics_hepes.png')    
+    
+    
 
     #inits = pd.read_csv(("../data/inits/hepes"+str(ros)+".csv"))  
 
