@@ -33,6 +33,8 @@ df_all = pd.read_csv('../data/miliQ_bufferH_2013MorrisSIfig1b.csv')
 df_all.drop(df_all.columns[df_all.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
 df_all = df_all.rename({'Time':'time'}, axis=1)    #'renaming column to make it callable by 'times'
 
+
+
 df = df_all 
 
 #logging data for latter graphing 
@@ -84,8 +86,8 @@ ntreats = treats.shape[0]
 ##############################
 
 
-fig1,(ax1)= plt.subplots(ntreats,2, figsize = (12,10))
-fig1.suptitle('Raw H dynamics of Buffers in miliQwater')
+fig1,(ax1)= plt.subplots(ntreats,2, figsize = (11,8))
+fig1.suptitle('Raw H dynamics of Buffers in miliQwater', size = 22)
 fig1.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
 ax1[1,0].set_ylabel('HOOH concentration (\u03BCM)')
 ax1[3,0].set_xlabel('Time' )
@@ -93,8 +95,8 @@ ax1[0,0].semilogy()
 ax1[1,1].set_ylabel('STDV')
 ax1[3,1].set_xlabel('Mean' )
 
-fig2,(ax2) = plt.subplots(ntreats,2,figsize = (12,10))
-fig2.suptitle(' Log  H dynamics of Buffers in miliQwater')
+fig2,(ax2) = plt.subplots(ntreats,2,figsize = (11,8))
+fig2.suptitle(' Log  H dynamics of Buffers in miliQwater',size = 22)
 fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
 ax2[1,0].set_ylabel('HOOH concentration (\u03BCM)')
 ax2[2,0].set_xlabel('Time' )

@@ -15,7 +15,7 @@ to do: Get model working for Hepes treatments in data
 '''
 
 
-from scipy import *
+import scipy 
 from scipy.integrate import odeint
 import pandas as pd
 import numpy as np      
@@ -43,7 +43,7 @@ plt.rcParams['legend.fontsize'] = 'small'
 #import csv
 df_all = pd.read_csv("../data/Hepes_assay_2013.csv") #use relative paths 
 df_all.rename(columns = {'time(days)':'time'},inplace = True) 
-df_all.dropna()
+df_all.fillna(0)
 #use df clip? or just use 0H as control for base level of media 
 
 #making log of data to look at error (how to do in loop? all combined whe I tried)
@@ -101,9 +101,9 @@ ax1.semilogy()
 plt.tick_params(size = 14)
 
 
-fig2,(ax2)= plt.subplots(nROSs,2, figsize = (14,11))
+fig2,(ax2)= plt.subplots(nROSs,2, figsize = (13,11))
 fig2.suptitle('Raw H dynamics of Hepes Buffer ')
-fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
+fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.35)
 ax2[0,0].set_title('Production Curve')
 ax2[3,0].set_ylabel('HOOH concentration (\u03BCM)')
 ax2[-1,0].set_xlabel('Time' )
@@ -112,9 +112,9 @@ ax2[0,1].set_title('STATS')
 ax2[3,1].set_ylabel('STDV')
 ax2[-1,1].set_xlabel('Mean' )
 
-fig3,(ax3) = plt.subplots(nROSs,2,figsize = (14,11))
+fig3,(ax3) = plt.subplots(nROSs,2,figsize = (13,11))
 fig3.suptitle(' Log H dynamics of Hepes Buffer ')
-fig3.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
+fig3.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.35)
 ax3[0,0].set_title('Production Curve')
 ax3[3,0].set_ylabel('HOOH concentration (\u03BCM)')
 ax3[-1,0].set_xlabel('Time' )
@@ -123,10 +123,26 @@ ax3[0,1].set_title('STATS')
 ax3[3,1].set_ylabel('Log STDV')
 ax3[-1,1].set_xlabel('Log Mean' )
 
+fig4,(ax4) = plt.subplots(nROSs,2,figsize = (13,11))
+fig4.suptitle(' Coorelations of Hepes ')
+fig4.subplots_adjust(left=0.15, bottom=0.10, right=0.90, top=0.85, wspace=0.25, hspace=0.4)
+ax4[0,0].set_title('Raw ')
+ax4[0,1].set_title('Logged ')
 
 #graphing ROS dfs each 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     df = (df_all[df_all['Hepes_treatment']==ros]) # select one ROS treatment at a time 
+    #ratios for graphing?
+    raw_ratio =  (np.max(df.abundance/df.sigma))
+    log_ratio =  (np.max(df.log_abundance/df.log_sigma))
+    rats  = [raw_ratio,log_ratio]
+    print(raw_ratio,log_ratio,rats)
+    (rats) = np.rint(rats)
+    best_ratio = (np.max(rats))
+    rat_dif = (rats/best_ratio)
+    stretch_rat = abs(rat_dif -1)
+    print(stretch_rat)
+    #plot
     ax1.plot(df.time,df.abundance,color = colors[ri], marker = markers[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
     #raw data and stats for multi graph
     ax2[ri,0].errorbar(df.time,df.abundance, yerr=df.sigma, marker = markers[ri],markersize= 10, label =('Mean'), c=colors[ri])
@@ -134,12 +150,14 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     ax2[ri,0].errorbar(df.time,df.avg2, yerr=df.stdv2,marker = markers[ri],markersize= 10, label =('avg2'), color = 'brown' )
     #log y axis and add legend to dynamics graph 
     ax2[ri,0].semilogy()
+
     l2 = ax2[ri,0].legend(loc = 'upper left')
     l2.draw_frame(False)
     #graph loggedstats
-    ax2[ri,1].scatter(df.log_abundance,df.log_sigma, c=colors[ri])
-    ax2[ri,1].scatter(df.lavg1,df.stdlog1, c='k')
-    ax2[ri,1].scatter(df.lavg2,df.stdlog2, c='brown')
+    ax2[ri,1].scatter(df.abundance,df.sigma, c=colors[ri])
+    ax2[ri,1].scatter(df.avg1,df.stdv1, c='k')
+    ax2[ri,1].scatter(df.avg2,df.stdv2, c='brown')
+    
     #annotate side of large fig
     ax2[ri,0].text(1.2,0.5,('Hepes [] : '+ str(ros)),horizontalalignment='center', verticalalignment='center', transform=ax2[ri,1].transAxes)
 
@@ -153,17 +171,50 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     ax3[ri,0].semilogy()
     l3 = ax3[ri,0].legend(loc = 'upper left')
     l3.draw_frame(False)
-#annotate
+    #annotate large graph 
     ax3[ri,0].text(1.2,0.5,'Hepes [] : '+ str(ros),horizontalalignment='center', verticalalignment='center', transform=ax3[ri,1].transAxes)
-
-    #logged stats
-
-    ax3[ri,1].scatter(df.abundance,df.sigma, c=colors[ri])
-    ax3[ri,1].scatter(df.avg1,df.stdv1, c='k')
-    ax3[ri,1].scatter(df.avg2,df.stdv2, c='brown')
-
-
     
+    #lgraph ogged stats
+    ax3[ri,1].scatter(df.log_abundance,df.log_sigma, c=colors[ri])
+    ax3[ri,1].scatter(df.lavg1,df.stdlog1, c='k')
+    ax3[ri,1].scatter(df.lavg2,df.stdlog2, c='brown')
+
+
+#create coorelations for fig 4
+    raw_r,raw_p  = scipy.stats.pearsonr(df['abundance'],df['sigma'])
+    log_r,log_p = scipy.stats.pearsonr(df['log_abundance'],df['log_sigma'])
+    print(raw_r,log_r)
+#Graph raw and logged coorelations for each ROS 
+
+
+    #annotate coor graph 
+    ax4[ri,0].hist(raw_r,color = 'b')
+    ax4[ri,1].hist(log_r,color = 'r')
+    ax4[ri,0].text(1.2,0.5,'Hepes [] : '+ str(ros),horizontalalignment='center', verticalalignment='center', transform=ax3[ri,1].transAxes)
+ 
+
+    #working to set y and x lims
+    '''
+    #ax2.set_xlim(x.min()/ymin(), x.max()/ymax())
+    #ax2[ri,1].set_xlim(0, int(np.max()))
+    #plt.xlim(0, best_ratio)
+    #plt.ylim(0, best_ratio)
+    '''
+
+#config large stats  graph labels 
+# ylabels
+for a in ax2[:,1]:
+    a.set_ylabel('STDV')
+    a.set_xlabel('Mean')
+    #a.set_xlim(((stretch_rat[0])*df.abundance[0]),(stretch_rat[0])*df.abundance[-1])
+    #a.set_ylim()
+
+for a in ax3[:,1]:
+    a.set_ylabel('Log STDV')
+    a.set_xlabel('Log Mean ')
+    #a.set_xlim()
+    #a.set_ylim()
+
 
 
 #makinng legend (must be after graphing to have label handles)

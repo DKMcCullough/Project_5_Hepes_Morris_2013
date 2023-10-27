@@ -31,7 +31,7 @@ df_all = pd.read_csv('../data/light_assay_2013.csv')
 
 df_all.drop(df_all.columns[df_all.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
 df_all = df_all.rename({'Time':'time'}, axis=1)    #'renaming column to make it callable by 'times'
-
+df_all.fillna(0)
 #creating log and stats for data 
 df_all['log1'] = np.log(df_all['rep1'])
 df_all['log2'] = np.log(df_all['rep2'])
@@ -68,22 +68,22 @@ ntreats = treats.shape[0]
 
 for a,n in zip(assays,range(nassays)):
     dfw = df_all[(df_all['Buffer'] == a)]
-    fig1,(ax1)= plt.subplots(ntreats,2, figsize = (14,12))
-    fig1.suptitle('H raw Dynamics from'+ str(a) +' light')
+    fig1,(ax1)= plt.subplots(ntreats,2, figsize = (14,11))
+    fig1.suptitle('H raw Dynamics from'+ str(a) +' light', size = 22)
     fig1.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
-    ax1[3,0].set_ylabel('HOOH concentration (\u03BCM)')
-    ax1[5,0].set_xlabel('Time' )
+    ax1[3,0].set_ylabel('HOOH concentration (\u03BCM)', size = 16)
+    ax1[5,0].set_xlabel('Time' , size = 16)
     ax1[0,0].semilogy()
-    ax1[3,1].set_ylabel('STDV')
-    ax1[5,1].set_xlabel('Mean' )
-    fig2,(ax2) = plt.subplots(ntreats,2,figsize = (14,12))
-    fig2.suptitle(' Log  dynamics of '+ str(a))
+    ax1[3,1].set_ylabel('STDV', size = 16)
+    ax1[5,1].set_xlabel('Mean' , size = 16)
+    fig2,(ax2) = plt.subplots(ntreats,2,figsize = (14,11))
+    fig2.suptitle(' Log  dynamics of '+ str(a), size = 22)
     fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
-    ax2[3,0].set_ylabel('HOOH concentration (\u03BCM)')
-    ax2[5,0].set_xlabel('Time' )
+    ax2[3,0].set_ylabel('HOOH concentration (\u03BCM)', size = 16)
+    ax2[5,0].set_xlabel('Time' , size = 16)
     ax2[0,0].semilogy()
-    ax2[3,1].set_ylabel('Log STDV')
-    ax2[5,1].set_xlabel('Log Mean' )
+    ax2[3,1].set_ylabel('Log STDV', size = 16)
+    ax2[5,1].set_xlabel('Log Mean', size = 16 )
     for t,nt in zip(treats,range(ntreats)):
         df = dfw[(dfw['Light']==t) & (dfw['Buffer']==a)]
         ax1[nt,0].plot(df['time'], df['rep1'], marker= '*', markersize= 10, label =('rep1'), color = 'pink') 

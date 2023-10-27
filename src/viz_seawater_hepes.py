@@ -29,7 +29,7 @@ df_all = pd.read_csv('../data/seawater_assay_2013.csv')
 
 df_all.drop(df_all.columns[df_all.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
 df_all = df_all.rename({'Time':'time'}, axis=1)    #'renaming column to make it callable by 'times'
-
+df_all.fillna(0)
 #creating log and stats for data 
 df_all['log1'] = np.log(df_all['rep1'])
 df_all['log2'] = np.log(df_all['rep2'])
@@ -67,16 +67,16 @@ ntreats = treats.shape[0]
 for a,n in zip(assays,range(nassays)):
     dfw = df_all[(df_all['Buffer'] == a)]
     #print(dfw)
-    fig1,(ax1)= plt.subplots(ntreats,2, figsize = (14,12))
-    fig1.suptitle('H raw Dynamics from'+ str(a) +'% Seawater')
+    fig1,(ax1)= plt.subplots(ntreats,2, figsize = (10,8))
+    fig1.suptitle('H raw Dynamics from'+ str(a) +'% Seawater', size = 22)
     fig1.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
     ax1[2,0].set_ylabel('HOOH concentration (\u03BCM)')
     ax1[4,0].set_xlabel('Time' )
     ax1[0,0].semilogy()
     ax1[2,1].set_ylabel('STDV')
     ax1[4,1].set_xlabel('Mean' )
-    fig2,(ax2) = plt.subplots(ntreats,2,figsize = (14,12))
-    fig2.suptitle(' Log  dynamics of '+ str(a)+' % Seawater')
+    fig2,(ax2) = plt.subplots(ntreats,2,figsize = (10,8))
+    fig2.suptitle(' Log  dynamics of '+ str(a)+' % Seawater', size = 22)
     fig2.subplots_adjust(right=0.85, left=0.10,wspace = 0.25, hspace = 0.30)
     ax2[2,0].set_ylabel('HOOH concentration (\u03BCM)')
     ax2[4,0].set_xlabel('Time' )

@@ -32,6 +32,7 @@ df_all = pd.read_csv('../data/all_buffers_2013Morrisf1c.csv')
 
 df_all.drop(df_all.columns[df_all.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
 df_all = df_all.rename({'Time':'time'}, axis=1)    #'renaming column to make it callable by 'times'
+df_all.fillna(0)
 
 #creating log and stats for data 
 df_all['log1'] = np.log(df_all['rep1'])

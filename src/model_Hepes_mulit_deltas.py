@@ -28,18 +28,50 @@ import matplotlib.pyplot as plt
 
 ######################################################################
 
-#import csv
-df_all = pd.read_csv("../data/fig1a_reformat.csv") #use relative paths 
-df_all.rename(columns = {'Time (days)':'times','treatment (milliMolar)':'treatment', 'HOOH (micromolar)':'HOOH'}, inplace = True)
-#df_all[['rep1', 'rep2','rep3']] = df_all[['rep1', 'rep2','rep3']].fillna(value=0)
-#df_all = df_all.dropna(axis = 1)     #taking NaN columns off the end of df but had to fill rep 1 and 2 Nans first
-#df_all = df_all.rename({'Time(days)':'times'}, axis=1)    #'renaming column to make it callable by 'times'
-#neeed to cut off extra NAN columns 
+import csv
+df_all = pd.read_csv("../data/Hepes_assay_2013.csv") #use relative paths 
+df_all.rename(columns = {'time(days)':'time'},inplace = True) 
+df_all.dropna()
+#use df clip? or just use 0H as control for base level of media 
+
+#making log of data to look at error (how to do in loop? all combined whe I tried)
+df_all['log1'] = np.log(df_all['rep1'])
+df_all['log2'] = np.log(df_all['rep2'])
+df_all['log3'] = np.log(df_all['rep3'])
+df_all['log4'] = np.log(df_all['rep4'])
+df_all['log5'] = np.log(df_all['rep5'])
+df_all['log6'] = np.log(df_all['rep6'])
+
+df_all['avg1'] = np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3']]],axis=0)
+df_all['avg2'] = np.nanmean(np.r_[[df_all[i] for i in ['rep4', 'rep5', 'rep6']]],axis=0)
+df_all['stdv1'] = np.std(np.r_[[df_all[i] for i in ['rep1','rep2','rep3']]],axis=0)
+df_all['stdv2'] = np.std(np.r_[[df_all[i] for i in ['rep4', 'rep5', 'rep6']]],axis=0)
+
+#bio rep logged avgs and stdvs 
+df_all['lavg1'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3']]],axis=0)
+df_all['lavg2'] = np.nanmean(np.r_[[df_all[i] for i in ['log4','log5','log6']]],axis=0)
+df_all['stdlog1'] = np.std(np.r_[[df_all[i] for i in ['log1','log2','log3']]],axis=0)
+df_all['stdlog2'] = np.std(np.r_[[df_all[i] for i in ['log4','log5','log6']]],axis=0)
 
 
-ROSs = df_all['treatment'].unique()
+
+
+#calculating stats for trial compilation
+df_all['abundance'] =  np.nanmean(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5','rep6']]],axis=0)
+df_all['sigma'] = np.nanstd(np.r_[[df_all[i] for i in ['rep1','rep2','rep3','rep4','rep5', 'rep6']]],axis=0)
+
+df_all['log_abundance'] = np.nanmean(np.r_[[df_all[i] for i in ['log1','log2','log3', 'log4','log5','log6']]],axis=0)
+df_all['log_sigma'] = np.nanstd(np.r_[[df_all[i] for i in ['log1','log2','log3','log4','log5','log6']]],axis=0)
+
+
+#split ROS treatments by number 
+ROSs = df_all['Hepes_treatment'].unique()
+ROSs = ROSs[~pd.isna(ROSs)] #clipping off nans 
+
 nROSs = ROSs.shape[0]
-#ROSs.sort()     #Change here to get ambient ROS to be 61 or 90 for species and 0 is detoxed. 
+
+colors = ('yellowgreen','green','c','b','purple','orange','r','k')
+markers = ('.','P','s','1','^','*','p','+')
 
 
 f1,ax1 = plt.subplots(figsize=[8,6])
@@ -48,11 +80,11 @@ colors = ('green','b','orange','r')
 h0s = np.array([])
 
 for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
-    tdf = (df_all[df_all['treatment']==ros]) # select one ROS treatment at a time 
-    hoohs = tdf['HOOH']
+    tdf = (df_all[df_all['Hepes_treatment']==ros]) # select one ROS treatment at a time 
+    hoohs = tdf.abundance
     h0 = hoohs.iloc[0]
     h0s = np.append(h0,h0s) #fing start H for each trial for easier modeling later
-    ax1.plot(tdf['times'],tdf['HOOH'], marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
+    ax1.plot(tdf['time'],tdf['abundance'], marker='s',color = colors[ri], markersize = 10, linestyle = ':', label='HEPES = '+str(ros)) # graph each 
 
 
 
