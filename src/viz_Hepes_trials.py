@@ -150,7 +150,7 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
     ax2[ri,0].errorbar(df.time,df.avg2, yerr=df.stdv2,marker = markers[ri],markersize= 10, label =('avg2'), color = 'brown' )
     #log y axis and add legend to dynamics graph 
     ax2[ri,0].semilogy()
-
+'''
     l2 = ax2[ri,0].legend(loc = 'upper left')
     l2.draw_frame(False)
     #graph loggedstats
@@ -194,13 +194,13 @@ for (ros,ri) in zip(ROSs,range(nROSs)): # loop over ROS
  
 
     #working to set y and x lims
-    '''
+
     #ax2.set_xlim(x.min()/ymin(), x.max()/ymax())
     #ax2[ri,1].set_xlim(0, int(np.max()))
     #plt.xlim(0, best_ratio)
     #plt.ylim(0, best_ratio)
-    '''
 
+'''
 #config large stats  graph labels 
 # ylabels
 for a in ax2[:,1]:

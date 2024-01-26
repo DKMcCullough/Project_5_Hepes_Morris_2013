@@ -131,6 +131,7 @@ for a,n in zip(assays,range(nassays)):
 
 
 '''
+print('Ahhhhhhhhhhhhhhhhhhhh')
 print('\n ~~~****~~~****~~~ \n')
-print('done with singular hepes')
+print('done with seawater  hepes')
 print('\n ~~~****~~~****~~~ \n')

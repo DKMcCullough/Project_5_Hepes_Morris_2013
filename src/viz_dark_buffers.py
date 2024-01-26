@@ -119,6 +119,9 @@ for t,nt in zip(treats,range(ntreats)):
     ax1[nt,0].errorbar(df.time,df.abundance, yerr=df.sigma, marker= '.',markersize= 10, label =('Mean'), color = 'c' )
     ax1[nt,0].errorbar(df.time,df.avg1, yerr=df.stdv1, marker= '.',markersize= 10, label =('avg1'), color = 'pink' )
     ax1[nt,0].errorbar(df.time,df.avg2, yerr=df.stdv2, marker= '.',markersize= 10, label =('avg2'), color = 'purple' )
+    ax1[nt,0].plot
+    
+    
     #annotate side of large fig
     ax1[nt,0].text(1.2,0.5,'Buffer: '+ str(t),horizontalalignment='center', verticalalignment='center', transform=ax1[nt,1].transAxes)
     #log y axis and add legend to dynamics graph 
@@ -131,6 +134,9 @@ for t,nt in zip(treats,range(ntreats)):
     ax1[nt,1].scatter(df.avg2,df.stdv2, c='purple')
     #graph logged dynamics 
     ax2[nt,0].errorbar(df.time,df.log_abundance, yerr=df.sigma, marker= '.',markersize= 10, label =('Log Mean'), color = 'c' )
+    
+    
+    
     ax2[nt,0].errorbar(df.time,df.lavg1, yerr=df.stdlog1, marker= '.',markersize= 10, label =('Log avg1'), color = 'pink' )
     ax2[nt,0].errorbar(df.time,df.lavg2, yerr=df.stdlog2, marker= '.',markersize= 10, label =('Log avg2'), color = 'purple' )
     #log y axis and add legend to dynamics graph 
